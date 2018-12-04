@@ -13,8 +13,9 @@ public class GeneticAlgorithm
     public double[] height = new double[4] { 0, 0.145, 0.679, 1.1436 };
     public double V_of_shelf = ((0.6737639 - 0.1639082) * 3) * (0.362 * 2) * (1.677 * 5);
     public double[] weight = new double[4] { 0, 1, 2, 3 };
+    public double[] turnover = new double[4] { 0, 0.3, 0.5, 0.2 };
     public Random random;
-    private static List<Individual> Population;
+    private List<Individual> Population;
 
     public GeneticAlgorithm()
     {
@@ -71,7 +72,7 @@ public class GeneticAlgorithm
     }
 
     //Init array
-    public void Init_situation()
+    public void Init_position()
     {
         for (int i = 1; i < 16; i++)
         {
@@ -255,11 +256,13 @@ public class GeneticAlgorithm
     }
 
     //w_1 & w-2 & w_3 => Objective function
-    public double Objective(int a, int b, int c)
+    public double Objective(int x, int y, int z)
     {
         double w_1 = 0.6;
         double w_2 = 0.2;
         double w_3 = 0.2;
+
+
 
         double res = 0;
 
@@ -269,7 +272,7 @@ public class GeneticAlgorithm
     }
 
     //Fitness value function 1
-    public double Fitness_value_1()
+    public double Fitness(int x, int y, int z)
     {
 
         return 0;
@@ -278,22 +281,28 @@ public class GeneticAlgorithm
     //Initialize population
     public void Initialize_population()
     {
-        var ran_x = 0;
+        int ran_x = 0;
         int ran_y = 0;
         int ran_z = 0;
         bool flag = true;
-        for (int h = 0; h < 10; h++)
+        for (int h = 0; h < 20; h++)
         {
             while (flag)
             {
-                ran_x = random.Next(1, 15);
-                ran_y = random.Next(1, 12);
-                ran_z = random.Next(1, 3);
+                ran_x = random.Next(1, 16);
+                ran_y = random.Next(1, 13);
+                ran_z = random.Next(1, 4);
                 if (position[ran_x, ran_y, ran_z] == 0)
                 {
+                    position[ran_x, ran_y, ran_z] = 1;
+                    Console.WriteLine(ran_x + " " + ran_y + " " + ran_z);
+                    Population.Add(new Individual(ran_x, ran_y, ran_z));
                     break;
                 }
-                Population.Add(new Individual(ran_x, ran_y, ran_z));
+                else
+                {
+                    Console.WriteLine("X_ " + ran_x + " " + ran_y + " " + ran_z);
+                }
             }
         }
     }

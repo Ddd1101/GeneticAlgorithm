@@ -6,7 +6,9 @@ namespace GA
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            GeneticAlgorithm ga = new GeneticAlgorithm();
+            ga.Init_position();
+            ga.Initialize_population();
         }
     }
 }
