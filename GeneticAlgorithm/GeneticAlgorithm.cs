@@ -11,16 +11,16 @@ public class GeneticAlgorithm
     public double min_crossover_rate = 0.5;
     public int[,,] position = new int[16, 13, 4];
     public double[] height = new double[4] { 0, 0.145, 0.679, 1.1436 };
-    public double V_of_shelf = ((0.6737639 - 0.1639082) * 3) * (0.362 * 2) * (1.677 * 5);
+    public double V_of_shelf = ((0.6737639 - 0.1639082) * 3) * (0.362 * 2) * (1.677 * 5) * 18;
     public double[] weight = new double[4] { 0, 1, 2, 3 };
     public double[] turnover = new double[4] { 0, 0.3, 0.5, 0.2 };
     public Random random;
-    private List<Individual> Population;
+    private List<Individual> population;
 
     public GeneticAlgorithm()
     {
         random = new Random();
-        Population = new List<Individual>();
+        population = new List<Individual>();
     }
 
     //crossover rate
@@ -200,6 +200,7 @@ public class GeneticAlgorithm
             centre_b = -3.187 + centre_y * 3 + 0.372;
         }
 
+        //Console.WriteLine(centre_z);
         centre_c = height[(int)centre_z];
 
         double a = 0;
@@ -234,25 +235,30 @@ public class GeneticAlgorithm
     {
         double core_of_shelf = 0;
 
-        double w_sum = 0;
+        double[] w_sum = new double[4];
 
-        for (int i = 1; i < 16; i++)
+        for (int i = 1; i < 4; i++)
         {
-            for (int j = 1; j < 13; j++)
+            w_sum[i] = 0;
+        }
+
+        for (int k = 1; k < 4; k++)
+        {
+            for (int i = 1; i < 16; i++)
             {
-                for (int k = 1; k < 4; k++)
+                for (int j = 1; j < 13; j++)
                 {
-                    if (position[i, j, k] != 0)
-                    {
-                        w_sum += weight[position[i, j, k]];
-                    }
+                    w_sum[k] += weight[position[i, j, k]];
                 }
+
             }
         }
 
-        core_of_shelf = w_sum / V_of_shelf;
+        double res = 0;
 
-        return core_of_shelf;
+        res = (w_sum[1] * 1 + w_sum[2] * 2 + w_sum[3] * 3) / (w_sum[1] + w_sum[2] + w_sum[3]);
+
+        return res;
     }
 
     //w_1 & w-2 & w_3 => Objective function
@@ -261,7 +267,6 @@ public class GeneticAlgorithm
         double w_1 = 0.6;
         double w_2 = 0.2;
         double w_3 = 0.2;
-
 
 
         double res = 0;
@@ -284,6 +289,7 @@ public class GeneticAlgorithm
         int ran_x = 0;
         int ran_y = 0;
         int ran_z = 0;
+        int ran_type = 0;
         bool flag = true;
         for (int h = 0; h < 20; h++)
         {
@@ -292,11 +298,11 @@ public class GeneticAlgorithm
                 ran_x = random.Next(1, 16);
                 ran_y = random.Next(1, 13);
                 ran_z = random.Next(1, 4);
+                ran_type = random.Next(1, 4);
                 if (position[ran_x, ran_y, ran_z] == 0)
                 {
-                    position[ran_x, ran_y, ran_z] = 1;
-                    Console.WriteLine(ran_x + " " + ran_y + " " + ran_z);
-                    Population.Add(new Individual(ran_x, ran_y, ran_z));
+                    position[ran_x, ran_y, ran_z] = ran_type;
+                    population.Add(new Individual(ran_x, ran_y, ran_z, ran_type));
                     break;
                 }
                 else
@@ -306,5 +312,65 @@ public class GeneticAlgorithm
             }
         }
     }
-}
 
+    public void test_input()
+    {
+        int ran_x = 0;
+        int ran_y = 0;
+        int ran_z = 0;
+        int ran_type = 0;
+        bool flag = true;
+        for (int h = 0; h < 150; h++)
+        {
+            while (flag)
+            {
+                ran_x = random.Next(1, 16);
+                ran_y = random.Next(1, 13);
+                ran_z = random.Next(1, 4);
+                ran_type = random.Next(1, 4);
+                if (position[ran_x, ran_y, ran_z] == 0)
+                {
+                    position[ran_x, ran_y, ran_z] = ran_type;
+                    break;
+                }
+                else
+                {
+                    //Console.WriteLine("X_ " + ran_x + " " + ran_y + " " + ran_z);
+                }
+            }
+        }
+
+    }
+
+    public void test_input_1()
+    {
+        for (int i = 1; i < 16; i++)
+        {
+            for (int j = 1; j < 13; j++)
+            {
+                position[i, j, 1] = 3;
+                population.Add(new Individual(i, j, 1, 3));
+            }
+
+        }
+    }
+
+    public void test()
+    {
+        foreach (var individual in population)
+        {
+            double fitness = 0;
+            double tmp = Distance(individual.x, individual.y, individual.z) / 64.4056;
+            fitness += 0.6 * (1-tmp);
+            Console.Write(individual.x + " " + individual.y + " " + individual.z + " " + individual.type + ": ");
+            Console.Write(tmp + "  ");
+            tmp = Centre_distance(individual.x, individual.y, individual.z, individual.type) / 31.5221;
+            fitness += 0.2 * (1 - tmp);
+            Console.Write(tmp + "  ");
+            tmp = Core_of_shelf(individual.x, individual.y, individual.z) / 3;
+            fitness += 0.2 * (1 - tmp);
+            Console.Write(tmp + "  ");
+            Console.WriteLine(fitness);
+        }
+    }
+}

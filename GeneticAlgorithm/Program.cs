@@ -8,7 +8,10 @@ namespace GA
         {
             GeneticAlgorithm ga = new GeneticAlgorithm();
             ga.Init_position();
+            ga.test_input();
             ga.Initialize_population();
+            //ga.test_input_1();
+            ga.test();
         }
     }
 }

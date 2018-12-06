@@ -7,12 +7,14 @@ public class Individual
     public int z { get; set; }
     public int age { get; set; }
     public double solution { get; set; }
+    public int type { get; set; }
 
-    public Individual(int xx, int yy, int zz)
+    public Individual(int xx, int yy, int zz, int type)
     {
         this.x = xx;
         this.y = yy;
         this.z = zz;
+        this.type = type;
     }
 
     public Individual()
