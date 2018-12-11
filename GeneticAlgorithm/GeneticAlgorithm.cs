@@ -5,6 +5,7 @@ using System;
 public class GeneticAlgorithm
 {
     public int population_size = 15 * 12 * 3;
+    public double A;
     public double max_mutation_rate = 0.05;
     public double min_mutation_rate = 0.005;
     public double max_crossover_rate = 0.8;
@@ -16,15 +17,69 @@ public class GeneticAlgorithm
     public double[] turnover = new double[4] { 0, 0.3, 0.5, 0.2 };
     public Random random;
     private List<Individual> population;
+    public double f_max;
+    public double f_avg;
+    public double f_sum;
+    public Individual parent1;
+    public Individual parent2;
 
     public GeneticAlgorithm()
     {
         random = new Random();
         population = new List<Individual>();
+        f_max = 0;
+        f_avg = 0;
+        f_sum = 0;
+        A = 9.903;
+    }
+
+    //Init array
+    public void Init_position()
+    {
+        for (int i = 1; i < 16; i++)
+        {
+            for (int j = 1; j < 13; j++)
+            {
+                for (int k = 1; k < 4; k++)
+                {
+                    position[i, j, k] = 0;
+                }
+            }
+        }
+    }
+
+    //Initialize population
+    public void Initialize_population()
+    {
+        int ran_x = 0;
+        int ran_y = 0;
+        int ran_z = 0;
+        int ran_type = 0;
+        bool flag = true;
+        for (int h = 0; h < 20; h++)
+        {
+            while (flag)
+            {
+                ran_x = random.Next(1, 16);
+                ran_y = random.Next(1, 13);
+                ran_z = random.Next(1, 4);
+                ran_type = random.Next(1, 4);
+                if (position[ran_x, ran_y, ran_z] == 0)
+                {
+                    position[ran_x, ran_y, ran_z] = ran_type;
+                    population.Add(new Individual(ran_x, ran_y, ran_z, ran_type));
+                    break;
+                }
+                else
+                {
+                    //Console.WriteLine("X_ " + ran_x + " " + ran_y + " " + ran_z);
+                }
+            }
+        }
     }
 
     //crossover rate
-    public double Mutation_rate(double A, double f_derivation, double f_avg, double f_max)
+    public double Crossover_rate(double f_derivation, double f_avg, double f_max)
     {
         if (f_derivation >= f_avg)
         {
@@ -39,7 +94,7 @@ public class GeneticAlgorithm
 
             member = 1 + Math.Exp((float)exp);
 
-            return (denominator / member + min_crossover_rate);
+            return ((denominator / member) + min_crossover_rate);
         }
         else
         {
@@ -48,7 +103,7 @@ public class GeneticAlgorithm
     }
 
     //mutation rate
-    public double Crossover_rate(double A, double f, double f_avg, double f_max)
+    public double Mutation_rate(double f, double f_avg, double f_max)
     {
         if (f >= f_avg)
         {
@@ -68,21 +123,6 @@ public class GeneticAlgorithm
         else
         {
             return max_mutation_rate;
-        }
-    }
-
-    //Init array
-    public void Init_position()
-    {
-        for (int i = 1; i < 16; i++)
-        {
-            for (int j = 1; j < 13; j++)
-            {
-                for (int k = 1; k < 4; k++)
-                {
-                    position[i, j, k] = 0;
-                }
-            }
         }
     }
 
@@ -233,8 +273,6 @@ public class GeneticAlgorithm
     //weight_3:Shelf stability
     public double Core_of_shelf(int x, int y, int z)
     {
-        double core_of_shelf = 0;
-
         double[] w_sum = new double[4];
 
         for (int i = 1; i < 4; i++)
@@ -261,53 +299,156 @@ public class GeneticAlgorithm
         return res;
     }
 
-    //w_1 & w-2 & w_3 => Objective function
-    public double Objective(int x, int y, int z)
-    {
-        double w_1 = 0.6;
-        double w_2 = 0.2;
-        double w_3 = 0.2;
-
-
-        double res = 0;
-
-        //f = w_1 * f1 + w_2 * f2 + w_3 * f3
-
-        return res;
-    }
-
     //Fitness value function 1
-    public double Fitness(int x, int y, int z)
+    public void Fitness()
     {
-
-        return 0;
+        foreach (var individual in population)
+        {
+            double fitness = 0;
+            double w1_fitness = Distance(individual.x, individual.y, individual.z) / 64.4056;
+            fitness += 0.6 * (1 - w1_fitness);
+            double w2_fitness = Centre_distance(individual.x, individual.y, individual.z, individual.type) / 31.5221;
+            fitness += 0.2 * (1 - w2_fitness);
+            double w3_fitness = Core_of_shelf(individual.x, individual.y, individual.z) / 3;
+            fitness += 0.2 * (1 - w3_fitness);
+            individual.value = fitness;
+        }
     }
 
-    //Initialize population
-    public void Initialize_population()
+    //calulate f_max & f_avg
+    public void cal_fmax_favg()
     {
-        int ran_x = 0;
-        int ran_y = 0;
-        int ran_z = 0;
-        int ran_type = 0;
-        bool flag = true;
-        for (int h = 0; h < 20; h++)
+        f_sum = 0;
+        f_max = 0;
+        foreach (var individual in population)
         {
-            while (flag)
+            f_sum += individual.value;
+            if (f_max < individual.value)
             {
-                ran_x = random.Next(1, 16);
-                ran_y = random.Next(1, 13);
-                ran_z = random.Next(1, 4);
-                ran_type = random.Next(1, 4);
-                if (position[ran_x, ran_y, ran_z] == 0)
+                f_max = individual.value;
+            }
+        }
+        f_avg = f_sum / (population.Count);
+        //Console.WriteLine(f_max + " " + f_avg);
+    }
+
+    //Roulette Wheel Selection
+    public void Selection()
+    {
+        double p_selection = 0;
+        double boundary = 0;
+        foreach (var individual in population)
+        {
+            p_selection = individual.value / f_sum;
+            individual.selection = p_selection;
+            individual.roulette_left = boundary;
+            boundary += p_selection;
+            individual.roulette_right = boundary;
+            //Console.WriteLine(p_selection + " " + individual.roulette_left + " " + individual.roulette_right);
+        }
+    }
+
+    //Stochastic Tournament
+    public Individual Pick_parents()
+    {
+        double num1 = random.NextDouble();
+        double num2 = random.NextDouble();
+
+        Individual tmp1 = new Individual();
+        Individual tmp2 = new Individual();
+
+        int it = 0;
+
+        foreach (var individual in population)
+        {
+            if ((num1 >= individual.roulette_left) && (num1 < individual.roulette_right))
+            {
+                tmp1 = individual;
+                it++;
+            }
+
+            if ((num2 >= individual.roulette_left) && (num2 < individual.roulette_right))
+            {
+                tmp2 = individual;
+                it++;
+            }
+            if (it == 2)
+            {
+                break;
+            }
+        }
+
+        //Console.WriteLine(num1 + " " + num2);
+        //Console.WriteLine(tmp1.selection + " " + tmp2.selection);
+        return (tmp1.value > tmp2.value ? tmp1 : tmp2);
+    }
+
+    //generate offspring
+    public void Offspring()
+    {
+        double p_c;
+        double p_m;
+        double f_derivation;
+        Individual offspring = new Individual();
+        double num1;
+        double num2;
+        int num3;
+        for (int i = 1; i < 20; i++)
+        {
+            parent1 = Pick_parents();
+            parent2 = Pick_parents();
+            Console.WriteLine(parent1.value + " " + parent2.value);
+
+            f_derivation = parent1.value > parent2.value ? parent1.value : parent2.value;
+            p_c = Crossover_rate(f_derivation, f_avg, f_max);
+            p_m = Mutation_rate(parent1.value, f_avg, f_max);
+            Console.WriteLine(p_c + " " + p_m);
+
+            num1 = random.NextDouble();
+            num2 = random.NextDouble();
+            //decide which dimension to crossover
+            num3 = random.Next(1, 4);
+
+            //crossover
+            if (num1 < p_c)
+            {
+                if (num3 == 1)
                 {
-                    position[ran_x, ran_y, ran_z] = ran_type;
-                    population.Add(new Individual(ran_x, ran_y, ran_z, ran_type));
-                    break;
+                    offspring.x = parent2.x;
+                    offspring.y = parent1.y;
+                    offspring.z = parent1.z;
+                }
+                else if (num3 == 2)
+                {
+                    offspring.x = parent1.x;
+                    offspring.y = parent2.y;
+                    offspring.z = parent1.z;
                 }
                 else
                 {
-                    Console.WriteLine("X_ " + ran_x + " " + ran_y + " " + ran_z);
+                    offspring.x = parent1.x;
+                    offspring.y = parent1.y;
+                    offspring.z = parent2.z;
+                }
+            }
+
+            //decide which dimension to mutation
+            num3 = random.Next(1, 3);
+
+            //mutation
+            if (num2 < p_m)
+            {
+                if (num3 == 1)
+                {
+                    offspring.x = random.Next(1, 16);
+                }
+                else if (num3 == 2)
+                {
+                    offspring.y = random.Next(1, 13);
+                }
+                else
+                {
+                    offspring.z = random.Next(1, 4);
                 }
             }
         }
@@ -361,7 +502,7 @@ public class GeneticAlgorithm
         {
             double fitness = 0;
             double tmp = Distance(individual.x, individual.y, individual.z) / 64.4056;
-            fitness += 0.6 * (1-tmp);
+            fitness += 0.6 * (1 - tmp);
             Console.Write(individual.x + " " + individual.y + " " + individual.z + " " + individual.type + ": ");
             Console.Write(tmp + "  ");
             tmp = Centre_distance(individual.x, individual.y, individual.z, individual.type) / 31.5221;

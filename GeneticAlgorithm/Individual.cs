@@ -6,8 +6,11 @@ public class Individual
     public int y { get; set; }
     public int z { get; set; }
     public int age { get; set; }
-    public double solution { get; set; }
+    public double value { get; set; }
     public int type { get; set; }
+    public double selection { get; set; }
+    public double roulette_left { get; set; }
+    public double roulette_right { get; set; }
 
     public Individual(int xx, int yy, int zz, int type)
     {
@@ -15,10 +18,14 @@ public class Individual
         this.y = yy;
         this.z = zz;
         this.type = type;
+        roulette_left = roulette_right = 0;
+        selection = 0;
     }
 
     public Individual()
     {
 
     }
+
+
 }

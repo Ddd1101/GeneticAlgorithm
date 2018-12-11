@@ -10,8 +10,13 @@ namespace GA
             ga.Init_position();
             ga.test_input();
             ga.Initialize_population();
+            ga.Fitness();
             //ga.test_input_1();
-            ga.test();
+            ga.cal_fmax_favg();
+            ga.Selection();
+            ga.Pick_parents();
+            ga.Offspring();
+            //ga.test();
         }
     }
 }

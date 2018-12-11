@@ -1,0 +1,6 @@
+/Users/ddd/Documents/VS_workplace/GeneticAlgorithm/GeneticAlgorithm/bin/Debug/GeneticAlgorithm.exe
+/Users/ddd/Documents/VS_workplace/GeneticAlgorithm/GeneticAlgorithm/bin/Debug/GeneticAlgorithm.pdb
+/Users/ddd/Documents/VS_workplace/GeneticAlgorithm/GeneticAlgorithm/obj/x86/Debug/GeneticAlgorithm.csprojAssemblyReference.cache
+/Users/ddd/Documents/VS_workplace/GeneticAlgorithm/GeneticAlgorithm/obj/x86/Debug/GeneticAlgorithm.csproj.CoreCompileInputs.cache
+/Users/ddd/Documents/VS_workplace/GeneticAlgorithm/GeneticAlgorithm/obj/x86/Debug/GeneticAlgorithm.exe
+/Users/ddd/Documents/VS_workplace/GeneticAlgorithm/GeneticAlgorithm/obj/x86/Debug/GeneticAlgorithm.pdb
