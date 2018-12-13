@@ -27,5 +27,12 @@ public class Individual
 
     }
 
-
+    public int CompareTo(Individual other)
+    {
+        if (null == other)
+        {
+            return 1;
+        }
+        return other.value.CompareTo(this.value);
+    }
 }

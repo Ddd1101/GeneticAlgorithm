@@ -36,6 +36,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Individual.cs" />
     <Compile Include="GeneticAlgorithm.cs" />
+    <Compile Include="Best_result.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>
