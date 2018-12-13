@@ -17,6 +17,7 @@ public class GeneticAlgorithm
     public double[] turnover = new double[4] { 0, 0.3, 0.5, 0.2 };
     public Random random;
     private List<Individual> population;
+    public Queue<Individual> offspring_list;
     public double f_max;
     public double f_avg;
     public double f_sum;
@@ -27,6 +28,7 @@ public class GeneticAlgorithm
     {
         random = new Random();
         population = new List<Individual>();
+        offspring_list = new Queue<Individual>();
         f_max = 0;
         f_avg = 0;
         f_sum = 0;
@@ -54,16 +56,16 @@ public class GeneticAlgorithm
         int ran_x = 0;
         int ran_y = 0;
         int ran_z = 0;
-        int ran_type = 0;
+        int ran_type = 1;
         bool flag = true;
         for (int h = 0; h < 20; h++)
         {
             while (flag)
             {
-                ran_x = random.Next(1, 16);
-                ran_y = random.Next(1, 13);
-                ran_z = random.Next(1, 4);
-                ran_type = random.Next(1, 4);
+                ran_x = random.Next(1, 15) + 1;
+                ran_y = random.Next(1, 12) + 1;
+                ran_z = random.Next(1, 3) + 1;
+                //ran_type = random.Next(1, 4);
                 if (position[ran_x, ran_y, ran_z] == 0)
                 {
                     position[ran_x, ran_y, ran_z] = ran_type;
@@ -312,12 +314,16 @@ public class GeneticAlgorithm
             double w3_fitness = Core_of_shelf(individual.x, individual.y, individual.z) / 3;
             fitness += 0.2 * (1 - w3_fitness);
             individual.value = fitness;
+            //Console.WriteLine(fitness);
         }
+        //Console.WriteLine("====================");
+        //Console.WriteLine("====================");
     }
 
     //calulate f_max & f_avg
     public void cal_fmax_favg()
     {
+        //Console.WriteLine("cal_fmax_favg");
         f_sum = 0;
         f_max = 0;
         foreach (var individual in population)
@@ -329,7 +335,8 @@ public class GeneticAlgorithm
             }
         }
         f_avg = f_sum / (population.Count);
-        //Console.WriteLine(f_max + " " + f_avg);
+        Console.WriteLine(f_max + " " + f_avg);
+        Console.WriteLine("====================");
     }
 
     //Roulette Wheel Selection
@@ -393,21 +400,23 @@ public class GeneticAlgorithm
         double num1;
         double num2;
         int num3;
-        for (int i = 1; i < 20; i++)
+        bool flag = true;
+        flag = true;
+        while (flag)
         {
             parent1 = Pick_parents();
             parent2 = Pick_parents();
-            Console.WriteLine(parent1.value + " " + parent2.value);
+            //Console.WriteLine(parent1.value + " " + parent2.value);
 
             f_derivation = parent1.value > parent2.value ? parent1.value : parent2.value;
             p_c = Crossover_rate(f_derivation, f_avg, f_max);
             p_m = Mutation_rate(parent1.value, f_avg, f_max);
-            Console.WriteLine(p_c + " " + p_m);
+            //Console.WriteLine(p_c + " " + p_m);
 
             num1 = random.NextDouble();
             num2 = random.NextDouble();
             //decide which dimension to crossover
-            num3 = random.Next(1, 4);
+            num3 = random.Next(1, 3) + 1;
 
             //crossover
             if (num1 < p_c)
@@ -440,18 +449,61 @@ public class GeneticAlgorithm
             {
                 if (num3 == 1)
                 {
-                    offspring.x = random.Next(1, 16);
+                    offspring.x = random.Next(1, 15) + 1;
                 }
                 else if (num3 == 2)
                 {
-                    offspring.y = random.Next(1, 13);
+                    offspring.y = random.Next(1, 12) + 1;
                 }
                 else
                 {
-                    offspring.z = random.Next(1, 4);
+                    offspring.z = random.Next(1, 3) + 1;
                 }
             }
+            offspring.type = 1;
+            if (position[offspring.x, offspring.y, offspring.z] == 0)
+            {
+                position[offspring.x, offspring.y, offspring.z] = offspring.type;
+                flag = false;
+            }
         }
+
+        offspring_list.Enqueue(offspring);
+    }
+
+    //exchange between parents and offspring
+    public void Exchang()
+    {
+        population.Sort(sortlist);
+        for (int i = 0; i < 10; i++)
+        {
+            position[population[0].x, population[0].y, population[0].z] = 0;
+            population.Remove(population[0]);
+        }
+        population.Sort(sortlist);
+        int num = offspring_list.Count;
+        for (int i = 0; i < num; i++)
+        {
+            population.Add(offspring_list.Dequeue());
+        }
+        for (int i = 0; i < population.Count; i++)
+        {
+            Console.WriteLine(population[i].x + " " + population[i].y + " " + population[i].z + " ");
+        }
+        Console.WriteLine("================");
+    }
+
+    private int sortlist(Individual a, Individual b)
+    {
+        if (a.value > b.value)
+        {
+            return 1;
+        }
+        else if (a.value < b.value)
+        {
+            return -1;
+        }
+        return 0;
     }
 
     public void test_input()
@@ -461,14 +513,14 @@ public class GeneticAlgorithm
         int ran_z = 0;
         int ran_type = 0;
         bool flag = true;
-        for (int h = 0; h < 150; h++)
+        for (int h = 0; h < 1; h++)
         {
             while (flag)
             {
-                ran_x = random.Next(1, 16);
-                ran_y = random.Next(1, 13);
-                ran_z = random.Next(1, 4);
-                ran_type = random.Next(1, 4);
+                ran_x = random.Next(1, 15) + 1;
+                ran_y = random.Next(1, 12) + 1;
+                ran_z = random.Next(1, 3) + 1;
+                ran_type = random.Next(1, 3) + 1;
                 if (position[ran_x, ran_y, ran_z] == 0)
                 {
                     position[ran_x, ran_y, ran_z] = ran_type;
